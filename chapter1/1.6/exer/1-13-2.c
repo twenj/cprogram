@@ -32,9 +32,14 @@ void main(){
         }
     }
 
-    for(i = 0; i < MAXNUM; i++){
-        for(j = 0; j < wn[i]; j++){
-            printf("*");
+    for(i = 0; i < MAXLONG; i++){
+        for(j = 0; j < MAXNUM; j++){
+            if(i < (MAXLONG - wn[j])){
+                //printf("%d", i);
+                printf(" ");
+            }else{
+                printf("*");
+            }
         }
         printf("\n");
     }
