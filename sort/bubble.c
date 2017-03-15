@@ -1,23 +1,22 @@
 #include <stdio.h>
+#define ARRNUM 10
+/*冒泡排序*/
+int main() {
+    int i, j, temp;
+    int arr[ARRNUM] = {12, 45, 4, 96, 42, 55, 7, 36, 9, 78};
 
-void main(){
-    int arr[10] = {2, 4, 6, 8, 9, 23,56,74,23,45};
-    int i;
-    int j;
-    int len = sizeof(arr) / sizeof(arr[0]);
-    int tmp;
-
-    for(i = 0; i< len; i++){
-        for(j = len; j > 0; j--){
-            if(arr[j] < arr[j - 1]){
-                tmp = arr[j - 1];
-                arr[j - 1] = arr[j];
-                arr[j] = tmp;
+    for (i = 0; i < ARRNUM; i++){
+        for(j = ARRNUM - 1; j > i; j--){
+            if(arr[i] > arr[j]){
+                temp = arr[i];
+                arr[i] = arr[j];
+                arr[j] = temp;
             }
         }
     }
 
-    for(i = 0; i < len; i++){
-        printf("%d,\n", arr[i]);
+    for(i = 0; i < ARRNUM; i++){
+        printf("%d, ", arr[i]);
     }
+    printf("\n");
 }
