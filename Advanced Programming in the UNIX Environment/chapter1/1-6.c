@@ -1,4 +1,4 @@
-#include "apue.3e/include/apue.h"
+#include "../apue.3e/include/apue.h"
 int main(void)
 {
     printf("hello world from process ID %ld\n", (long)getpid());
