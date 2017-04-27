@@ -2,7 +2,7 @@
 #ifdef SOLARIS
 #include <sys/mkdev.h>
 #else
-#include <sys/type.h>
+#include <linux/fs.h>
 #endif
 
 int main(int argc, char *argv[])
