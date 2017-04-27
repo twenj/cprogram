@@ -1,6 +1,8 @@
 #include "../apue.3e/lib/error.c"
 #ifdef SOLARIS
 #include <sys/mkdev.h>
+#else
+#include <type.h>
 #endif
 
 int main(int argc, char *argv[])
