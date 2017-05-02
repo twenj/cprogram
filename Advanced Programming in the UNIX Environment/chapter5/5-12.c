@@ -2,7 +2,7 @@
 
 int main(void)
 {
-	charname[L_tmpnam], linep[MAXLINE];
+	char charname[L_tmpnam], line[MAXLINE], name[MAXLINE];
 	FILE *fp;
 	
 	printf("%s\n", tmpnam(NULL));
