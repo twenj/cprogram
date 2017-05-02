@@ -18,11 +18,13 @@ int main(void)
 	pr_stdio("stdout", stdout);
 	pr_stdio("stderr", stderr);
 	
-	if ((fp = fopen("/etc/passwd", "r")) == NULL)
+	char file[] = "C:/Users/Administrator/.gitconfig";
+	
+	if ((fp = fopen(file, "r")) == NULL)
 		err_sys("fopen error");
 	if (getc(fp) == EOF)
 		err_sys("getc error");
-	pr_stdio("/etc/passwd", fp);
+	pr_stdio(file, fp);
 	exit(0);
 }
 
@@ -60,17 +62,17 @@ int buffer_size(FILE *fp)
 
 int is_unbuffered(FILE *fp)
 {
-	return(fp->_flags & _SNBF);
+	return(fp->_flags & __SNBF);
 }
 
 int is_linebuffered(FILE *fp)
 {
-	return(fp->_flags & _SLBF);
+	return(fp->_flags & __SLBF);
 }
 
 int buffer_size(FILE *fp)
 {
-	return(fp->_bf.size);
+	return(fp->_bf._size);
 }
 
 #elif defined(_IONBF)
