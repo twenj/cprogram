@@ -69,6 +69,77 @@ LINE_STATUS parse_line(char* buffer, int& checked_index, int& read_index)
 	return LINE_OPEN;
 }
 
+/* 分析请求行 */
+HTTP_CODE parse_requestline(char* temp, CHECK_STATE& checkstate)
+{
+	char* url = strpbrk(temp, " \t");
+	/* 如果请求行中没有空白字符或“\t”字符，则 HTTP 请求必有问题 */
+	if ( ! url) {
+		return BAD_REQUEST;
+	}
+	*url++ = '\0';
+
+	char* method = temp;
+	if (strcasecmp(method, "GET") == 0)		/* 仅支持 GET 方法 */
+	{
+		printf("The request method is GET\n");
+	}
+	else
+	{
+		return BAD_REQUEST;
+	}
+
+	url += strspn(url, " \t");
+	char* version = strpbrk(url, " \t");
+	if ( ! version) 
+	{
+		return BAD_REQUEST;
+	}
+	*version++ = '\0';
+	version += strspn(version, " \t");
+	/* 仅支持 HTTP/1.1 */
+	if (strcasecmp(version, "HTTP/1.1") != 0)
+	{
+		return BAD_REQUEST;
+	}
+	/* 检查 URL 是否合法 */
+	if (strncasecmp(url, "http://", 7) == 0)
+	{
+		url += 7;
+		url = strchr(url, '/');
+	}
+
+	if ( ! url || url[0] != '/')
+	{
+		return BAD_REQUEST;
+	}
+	printf("The request URL is: %s\n", url);
+	/* HTTP 请求行处理完毕，状态转移到头部字段的分析 */
+	checkstate = CHECK_STATE_HEADER;
+	return NO_REQUEST;
+}
+
+/* 分析头部字段 */
+HTTP_CODE parse_headers(char* temp)
+{
+	/* 遇到一个空行，说明我们得到了一个正确的 HTTP 请求 */
+	if (temp[0] == '\0')
+	{
+		return GET_REQUEST;
+	}
+	else if (strncasecmp(temp, "Host:", 5) == 0)	/* 处理“HOST”头部字段 */
+	{
+		temp += 5;
+		temp += strspn(temp, " \t");
+		printf("the request host is: %s\n", temp);
+	}
+	else	/* 其他头部字段都不处理 */ 
+	{
+		printf("I can not handle this header\n");
+	}
+	return NO_REQUEST;
+}
+
 /* 分析 HTTP 请求的入口函数 */
 HTTP_CODE parse_content(char* buffer, int& checked_index, CHECK_STATE& checkstate, int& read_index, int& start_line)
 {
@@ -82,9 +153,40 @@ HTTP_CODE parse_content(char* buffer, int& checked_index, CHECK_STATE& checkstat
 		switch (checkstate) {
 			case CHECK_STATE_REQUESTLINE:		/* 第一个状态，分析请求行 */
 			{
+				retcode = parse_requestline(temp, checkstate);
+				if (retcode == BAD_REQUEST)
+				{
+					return BAD_REQUEST;
+				}
 				break;
 			}
+			case CHECK_STATE_HEADER:
+			{
+				retcode = parse_headers(temp);
+				if (retcode == BAD_REQUEST)
+				{
+					return BAD_REQUEST;
+				}
+				else if (retcode == GET_REQUEST)
+				{
+					return GET_REQUEST;
+				}
+				break;
+			}
+			default:
+			{
+				return INTERNAL_ERROR;
+			}
 		}
+	}
+	/* 若没有读取到一个完整的行，则表示还需要继续读取客户数据才能进一步分析 */
+	if (linestatus == LINE_OPEN)
+	{
+		return NO_REQUEST;
+	}
+	else
+	{
+		return BAD_REQUEST;
 	}
 }
 
