@@ -7,20 +7,20 @@
 #include <unistd.h>
 #include <errno.h>
 #include <string.h>
-#include <fcntl.n>
+#include <fcntl.h>
 
 #define BUFFER_SIZE 4096	/* 读缓冲区大小 */
 /* 主状态机的两种可能状态，分别表示：当前正在分析请求行，当前正在分析头部字段 */
-enum LINE_STATE (CHECK_STATE_REQUESTLINE = 0, CHECK_STATE_HEADER);
+enum CHECK_STATE {CHECK_STATE_REQUESTLINE = 0, CHECK_STATE_HEADER};
 /* 从状态机的三种可能状态，即行的读取状态，分别表示：读取到一个完整的行、行出错和行数据尚且不完整 */
-enum LINE_STATUS (LINE_OK = 0, LINE_BAD, LINE_OPEN);
+enum LINE_STATUS {LINE_OK = 0, LINE_BAD, LINE_OPEN};
 /* 
 	服务器处理 HTTP 请求的结果：NO_REQUEST 表示请求不完整，需要继续读取客户数据：GET_REQUEST
 	表示获得了一个完整的客户请求：BAD_REQUEST 表示客户请求有语法错误：FORBIDDEN_REQUEST 表示客户对资
 	源没有足够的访问权限：INTERNAL_ERROR 表示服务器内部错误：CLOSED_CONNECTION 表示客户端已经关闭
 	连接了
  */
-enum  HTTP_CODE (NO_REQUEST, GET_REQUEST, BAD_REQUEST, FORBIDDEN_REQUEST, INTERNAL_ERROR, CLOSED_CONNECTION);
+enum  HTTP_CODE {NO_REQUEST, GET_REQUEST, BAD_REQUEST, FORBIDDEN_REQUEST, INTERNAL_ERROR, CLOSED_CONNECTION};
 /* 为了简化问题，我们并没有给客户端发送一个完整的 HTTP 应答报文，而只是根据服务器的处理结果发送如下成功或失败消息 */
 static const char* szret[] = {"I get a correct result\n", "Something wrong\n"};
 
@@ -193,14 +193,14 @@ HTTP_CODE parse_content(char* buffer, int& checked_index, CHECK_STATE& checkstat
 int main(int argc, char* argv[])
 {
 	if (argc <= 2) {
-		printf("usage: %s ip_address port_number\n", basename(argc[0]));
+		printf("usage: %s ip_address port_number\n", basename(argv[0]));
 		return 1;
 	}
 	const char* ip = argv[1];
 	int port = atoi(argv[2]);
 
 	struct sockaddr_in address;
-	bzore(&address, sizeof(address));
+	bzero(&address, sizeof(address));
 	address.sin_family = AF_INET;
 	inet_pton(AF_INET, ip, &address.sin_addr);
 	address.sin_port = htons(port);
