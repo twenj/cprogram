@@ -14,6 +14,14 @@
     
 #define BUFFER_SIZE 1023
 
+int setnonblocking(int fd)
+{
+    int old_option = fcntl(fd, F_GETFL);
+    int new_option = old_option | O_NONBLOCK;
+    fcntl(fd, F_SETFL, new_option);
+    return old_option;
+}
+
 /* 超时连接函数，参数分别是服务器 IP 地址、端口号和超时时间（毫秒）。函数成功时返回已经处于连接状态的 socket ，失败则返回 -1 */
 int unblock_connect(const char* ip, int port, int time)
 {
@@ -38,7 +46,7 @@ int unblock_connect(const char* ip, int port, int time)
     {
         /* 如果连接没有建立，那么只有当 errno 是 EINPROGRESS 时才表示链接还在进行，否则返回出错 */
         printf("unblock connect not support\n");
-        return -1
+        return -1;
     }
 
     fd_set readfds;
@@ -48,7 +56,7 @@ int unblock_connect(const char* ip, int port, int time)
     FD_ZERO(&readfds);
     FD_SET(sockfd, &writefds);
 
-    timeout.tv_set = time;
+    timeout.tv_sec = time;
     timeout.tv_usec = 0;
 
     ret = select(sockfd + 1, NULL, &writefds, NULL, &timeout);
