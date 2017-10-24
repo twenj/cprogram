@@ -24,6 +24,14 @@ struct client_data
     char buf[BUFFER_SIZE];
 };
 
+int setnonblocking(int fd)
+{
+    int old_option = fcntl(fd, F_GETFL);
+    int new_option = old_option | O_NONBLOCK;
+    fcntl(fd, F_SETFL, new_option);
+    return old_option;
+}
+
 int main(int argc, char* argv[])
 {
     if (argc <= 2)
@@ -47,7 +55,7 @@ int main(int argc, char* argv[])
     ret = bind(listenfd, (struct sockaddr*)&address, sizeof(address));
     assert(ret != -1);
 
-    ret = listen(listen, 5);
+    ret = listen(listenfd, 5);
     assert(ret != -1);
     /* 
         创建 users 数组，分配 FD_LIMIT 个 client_data 对象。可以预期：每个可能的 socket 连接 
@@ -158,7 +166,7 @@ int main(int argc, char* argv[])
                         {
                             continue;
                         }
-                        fds[j].events &= ~POLLIN;
+                        fds[j].events |= ~POLLIN;
                         fds[j].events |= POLLOUT;
                         users[fds[j].fd].write_buf = users[connfd].buf;
                     }
@@ -174,7 +182,7 @@ int main(int argc, char* argv[])
                 ret = send(connfd, users[connfd].write_buf, strlen(users[connfd].write_buf), 0);
                 users[connfd].write_buf = NULL;
                 /* 写完数据后需要重新注册 fds[i] 上的可读事件 */
-                fds[i].events &= ~POLLOUT;
+                fds[i].events |= ~POLLOUT;
                 fds[i].events |= POLLIN;
             }
         }
